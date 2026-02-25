@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/qless-survey_1.html" }
+  ]
+}

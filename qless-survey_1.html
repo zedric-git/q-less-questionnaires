@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q-Less Pre-Survey | CIT-U</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0f14;
+    --paper: #f5f2ec;
+    --accent: #c84b31;
+    --accent2: #2b5be0;
+    --muted: #7a7770;
+    --border: #ddd9d0;
+    --card: #ffffff;
+    --progress-h: 4px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* Progress bar */
+  #progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: var(--progress-h);
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.4s ease;
+    z-index: 100;
+  }
+
+  header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 2.5rem 2rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: 'Q-LESS';
+    position: absolute;
+    right: -1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(5rem, 15vw, 12rem);
+    font-weight: 800;
+    color: rgba(255,255,255,0.04);
+    line-height: 1;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .header-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .tag {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.7rem;
+    border-radius: 2px;
+    margin-bottom: 0.9rem;
+  }
+
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 0.5rem;
+  }
+
+  header p {
+    font-size: 0.92rem;
+    color: rgba(245,242,236,0.6);
+    max-width: 520px;
+  }
+
+  /* Step nav */
+  .step-nav {
+    background: var(--ink);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 0 2rem 1.4rem;
+  }
+
+  .step-nav-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .step-dot {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: rgba(245,242,236,0.35);
+    cursor: pointer;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+
+  .step-dot.active { color: var(--paper); }
+  .step-dot.completed { color: var(--accent); }
+
+  .step-dot .num {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.68rem;
+    flex-shrink: 0;
+  }
+
+  .step-dot.completed .num {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  /* Main */
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 5rem;
+  }
+
+  .section {
+    display: none;
+    animation: fadeUp 0.35s ease both;
+  }
+
+  .section.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 0.3rem;
+  }
+
+  .section-subtitle {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1rem;
+  }
+
+  /* Card */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.4rem 1.6rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Part I fields */
+  label.field-label {
+    display: block;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.7rem;
+  }
+
+  .radio-group, .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .radio-option, .checkbox-option {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    cursor: pointer;
+    padding: 0.6rem 0.8rem;
+    border-radius: 6px;
+    border: 1.5px solid var(--border);
+    transition: all 0.15s;
+    font-size: 0.92rem;
+  }
+
+  .radio-option:hover, .checkbox-option:hover {
+    border-color: var(--accent2);
+    background: rgba(43,91,224,0.04);
+  }
+
+  .radio-option.selected, .checkbox-option.selected {
+    border-color: var(--accent2);
+    background: rgba(43,91,224,0.07);
+    color: var(--accent2);
+    font-weight: 500;
+  }
+
+  .radio-option input, .checkbox-option input {
+    accent-color: var(--accent2);
+    width: 16px; height: 16px;
+    flex-shrink: 0;
+  }
+
+  input[type="text"], textarea {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    color: var(--ink);
+    background: white;
+    transition: border-color 0.2s;
+    resize: vertical;
+  }
+
+  input[type="text"]:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent2);
+  }
+
+  /* Likert */
+  .likert-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .likert-header {
+    display: grid;
+    grid-template-columns: 1fr repeat(5, 52px);
+    gap: 0;
+    padding: 0 0 0.5rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .likert-header span {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.64rem;
+    font-weight: 700;
+    text-align: center;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.2;
+  }
+
+  .likert-row {
+    display: grid;
+    grid-template-columns: 1fr repeat(5, 52px);
+    align-items: center;
+    padding: 0.8rem 0;
+    border-top: 1px solid var(--border);
+    gap: 0;
+  }
+
+  .likert-row:last-child { border-bottom: 1px solid var(--border); }
+
+  .likert-row:hover { background: rgba(0,0,0,0.015); margin: 0 -1rem; padding-left: 1rem; padding-right: 1rem; border-radius: 4px; }
+
+  .likert-statement {
+    font-size: 0.88rem;
+    padding-right: 1rem;
+    line-height: 1.45;
+  }
+
+  .likert-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--muted);
+    margin-right: 0.5rem;
+    min-width: 1rem;
+    flex-shrink: 0;
+  }
+
+  .likert-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .likert-cell input[type="radio"] {
+    width: 18px; height: 18px;
+    accent-color: var(--accent2);
+    cursor: pointer;
+  }
+
+  /* Scale legend */
+  .scale-legend {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 1.2rem;
+    padding: 0.6rem 1rem;
+    background: rgba(0,0,0,0.025);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+
+  .scale-legend .scale-labels {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .scale-labels span { display: flex; align-items: center; gap: 0.3rem; }
+  .scale-labels .num-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--accent2);
+    color: white;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* Buttons */
+  .btn-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    gap: 1rem;
+  }
+
+  .btn {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.75rem 1.8rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-primary:hover { background: #a83826; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(200,75,49,0.3); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--ink); }
+
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+  /* Validation */
+  .error-msg {
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin-top: 0.5rem;
+    display: none;
+  }
+
+  .has-error .error-msg { display: block; }
+  .has-error .card { border-color: var(--accent); }
+
+  /* Success screen */
+  #section-done {
+    text-align: center;
+    padding: 4rem 1rem;
+  }
+
+  .success-icon {
+    width: 72px; height: 72px;
+    background: var(--ink);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+  }
+
+  #section-done h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.6rem;
+  }
+
+  #section-done p { color: var(--muted); max-width: 360px; margin: 0 auto; }
+
+  /* Question number */
+  .q-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .field-group { margin-bottom: 1.4rem; }
+
+  @media (max-width: 560px) {
+    .likert-header { grid-template-columns: 1fr repeat(5, 36px); }
+    .likert-row { grid-template-columns: 1fr repeat(5, 36px); }
+    .likert-header span { font-size: 0.54rem; }
+    .step-dot .label { display: none; }
+    .scale-labels { flex-direction: column; gap: 0.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="tag">Pre-Survey</div>
+    <h1>Q-Less Pre-Survey<br>Questionnaire</h1>
+    <p>A Real-Time Cloud-Based Virtual Queuing System for Cebu Institute of Technology – University. CTT R6 · Team Eureka — All responses are anonymous and used solely for academic research.</p>
+  </div>
+</header>
+
+<nav class="step-nav">
+  <div class="step-nav-inner">
+    <div class="step-dot active" data-step="0"><span class="num">I</span><span class="label">Profile</span></div>
+    <div class="step-dot" data-step="1"><span class="num">II</span><span class="label">Queue Experience</span></div>
+    <div class="step-dot" data-step="2"><span class="num">III</span><span class="label">Receptiveness</span></div>
+    <div class="step-dot" data-step="3"><span class="num">IV</span><span class="label">Feedback</span></div>
+  </div>
+</nav>
+
+<main>
+
+  <!-- PART I -->
+  <div class="section active" id="section-0">
+    <div class="section-title">Part I</div>
+    <div class="section-subtitle">Respondent Profile — Please check or fill in the appropriate response.</div>
+
+    <div id="q-year" class="card field-group">
+      <div class="q-num">Question 1</div>
+      <label class="field-label">Year Level</label>
+      <div class="radio-group" id="year-group">
+        <label class="radio-option"><input type="radio" name="year" value="1st Year"> 1st Year</label>
+        <label class="radio-option"><input type="radio" name="year" value="2nd Year"> 2nd Year</label>
+        <label class="radio-option"><input type="radio" name="year" value="3rd Year"> 3rd Year</label>
+        <label class="radio-option"><input type="radio" name="year" value="4th Year"> 4th Year</label>
+        <label class="radio-option"><input type="radio" name="year" value="5th Year / Beyond"> 5th Year / Beyond</label>
+      </div>
+      <div class="error-msg">Please select your year level.</div>
+    </div>
+
+    <div id="q-dept" class="card field-group">
+      <div class="q-num">Question 2</div>
+      <label class="field-label" for="dept-input">College / Department</label>
+      <input type="text" id="dept-input" placeholder="e.g., College of Computer Studies">
+      <div class="error-msg">Please enter your college or department.</div>
+    </div>
+
+    <div id="q-freq" class="card field-group">
+      <div class="q-num">Question 3</div>
+      <label class="field-label">How often do you visit university offices per semester?</label>
+      <div class="radio-group" id="freq-group">
+        <label class="radio-option"><input type="radio" name="freq" value="Rarely (1–2 times)"> Rarely (1–2 times)</label>
+        <label class="radio-option"><input type="radio" name="freq" value="Occasionally (3–5 times)"> Occasionally (3–5 times)</label>
+        <label class="radio-option"><input type="radio" name="freq" value="Frequently (6–10 times)"> Frequently (6–10 times)</label>
+        <label class="radio-option"><input type="radio" name="freq" value="Very Frequently (more than 10 times)"> Very Frequently (more than 10 times)</label>
+      </div>
+      <div class="error-msg">Please select how often you visit.</div>
+    </div>
+
+    <div class="btn-row">
+      <span></span>
+      <button class="btn btn-primary" onclick="goNext(0)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- PART II -->
+  <div class="section" id="section-1">
+    <div class="section-title">Part II</div>
+    <div class="section-subtitle">Current Queuing Experience — Rate each statement from 1 (Strongly Disagree) to 5 (Strongly Agree).</div>
+
+    <div class="scale-legend">
+      <div class="scale-labels">
+        <span><span class="num-badge">1</span> Strongly Disagree</span>
+        <span><span class="num-badge">2</span> Disagree</span>
+        <span><span class="num-badge">3</span> Neutral</span>
+        <span><span class="num-badge">4</span> Agree</span>
+        <span><span class="num-badge">5</span> Strongly Agree</span>
+      </div>
+    </div>
+
+    <div class="card" id="likert-part2-wrap">
+      <div class="likert-header">
+        <span></span>
+        <span>SD<br>1</span>
+        <span>D<br>2</span>
+        <span>N<br>3</span>
+        <span>A<br>4</span>
+        <span>SA<br>5</span>
+      </div>
+      <div id="likert-part2"></div>
+    </div>
+    <div class="error-msg" id="err-part2" style="display:none; margin-top:-0.5rem; margin-bottom:1rem;">Please answer all statements before continuing.</div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goBack(1)">← Back</button>
+      <button class="btn btn-primary" onclick="goNext(1)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- PART III -->
+  <div class="section" id="section-2">
+    <div class="section-title">Part III</div>
+    <div class="section-subtitle">Receptiveness to a Virtual Queuing System — The proposed Q-Less system allows students to join a queue remotely, monitor their position in real time, and receive notifications. Rate each statement from 1–5.</div>
+
+    <div class="scale-legend">
+      <div class="scale-labels">
+        <span><span class="num-badge">1</span> Strongly Disagree</span>
+        <span><span class="num-badge">2</span> Disagree</span>
+        <span><span class="num-badge">3</span> Neutral</span>
+        <span><span class="num-badge">4</span> Agree</span>
+        <span><span class="num-badge">5</span> Strongly Agree</span>
+      </div>
+    </div>
+
+    <div class="card" id="likert-part3-wrap">
+      <div class="likert-header">
+        <span></span>
+        <span>SD<br>1</span>
+        <span>D<br>2</span>
+        <span>N<br>3</span>
+        <span>A<br>4</span>
+        <span>SA<br>5</span>
+      </div>
+      <div id="likert-part3"></div>
+    </div>
+    <div class="error-msg" id="err-part3" style="display:none; margin-top:-0.5rem; margin-bottom:1rem;">Please answer all statements before continuing.</div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goBack(2)">← Back</button>
+      <button class="btn btn-primary" onclick="goNext(2)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- PART IV -->
+  <div class="section" id="section-3">
+    <div class="section-title">Part IV</div>
+    <div class="section-subtitle">Additional Feedback (Optional) — These responses will greatly help the researchers understand your experience.</div>
+
+    <div class="card field-group">
+      <div class="q-num">Question 1 · Optional</div>
+      <label class="field-label" for="oa1">What is the biggest challenge you face when queuing at university offices?</label>
+      <textarea id="oa1" rows="3" placeholder="Share your experience..."></textarea>
+    </div>
+
+    <div class="card field-group">
+      <div class="q-num">Question 2 · Optional</div>
+      <label class="field-label" for="oa2">What features would you most want in a virtual queuing system?</label>
+      <textarea id="oa2" rows="3" placeholder="e.g., SMS alerts, estimated wait time, mobile app, priority queuing..."></textarea>
+    </div>
+
+    <div class="card field-group">
+      <div class="q-num">Question 3 · Optional</div>
+      <label class="field-label" for="oa3">Do you have any other comments or suggestions regarding the queuing process at CIT-U?</label>
+      <textarea id="oa3" rows="3" placeholder="Any additional thoughts..."></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goBack(3)">← Back</button>
+      <button class="btn btn-primary" onclick="submitSurvey()">Submit Survey ✓</button>
+    </div>
+  </div>
+
+  <!-- DONE -->
+  <div id="section-done" style="display:none;">
+    <div class="success-icon">✓</div>
+    <h2>Thank You!</h2>
+    <p style="margin-bottom:1.2rem;">Your responses have been saved to the cloud. Your participation is valuable in improving university services.</p>
+    <div style="display:inline-block; background:var(--ink); color:var(--paper); font-family:'Syne',sans-serif; font-size:0.78rem; font-weight:700; letter-spacing:0.15em; padding:0.5rem 1.2rem; border-radius:4px; margin-bottom:1.2rem;">
+      RESPONSE ID: <span id="response-id-display" style="color:var(--accent);">—</span>
+    </div>
+    <p style="font-size:0.8rem; color:var(--muted); margin-bottom:0.4rem;">You may note your Response ID for your records.</p>
+    <p style="font-size:0.82rem; color:var(--muted);">— End of Survey — Q-Less Capstone Project, CTT R6 · Team Eureka</p>
+  </div>
+
+</main>
+
+<!-- Firebase SDK (v9 compat mode — works in plain HTML with no bundler) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+  // ============================================================
+  //  🔥 FIREBASE CONFIG — Replace with YOUR values from the
+  //     Firebase Console (Project Settings → Your apps → SDK)
+  // ============================================================
+  const firebaseConfig = {
+    apiKey:            "AIzaSyAFKbrgaxDke1iPFeiGuOTeslj4fxAyovM",
+    authDomain:        "qless-pre-survey.firebaseapp.com",
+    projectId:         "qless-pre-survey",
+    storageBucket:     "qless-pre-survey.firebasestorage.app",
+    messagingSenderId: "760469555291",
+    appId:             "1:760469555291:web:e8c99ac0e6c6ab81c5177e"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  // ============================================================
+
+  const part2Statements = [
+    "I often experience long waiting times when queuing at university offices.",
+    "The physical queues at university offices are usually crowded and congested.",
+    "Waiting in physical queues negatively affects my ability to attend classes or do other productive tasks.",
+    "I find it difficult to estimate how long I will have to wait in a queue.",
+    "The current queuing process at university offices is inefficient.",
+    "I have experienced being in the wrong queue or missing my turn due to a lack of clear information.",
+    "Peak periods (e.g., enrollment, exam weeks) make the queuing experience significantly worse."
+  ];
+
+  const part3Statements = [
+    "I would be willing to use a cloud-based virtual queuing system instead of waiting in a physical line.",
+    "Being able to monitor my queue position remotely (e.g., via phone or computer) would be very useful to me.",
+    "A virtual queuing system would allow me to use my waiting time more productively.",
+    "I believe a virtual queuing system would help reduce physical congestion in university offices.",
+    "Real-time queue updates (e.g., estimated wait time, current position) would improve my overall experience.",
+    "I would feel confident using a web-based or mobile-based queuing system for university transactions.",
+    "I believe that implementing a virtual queuing system is a practical and feasible solution for CIT-U."
+  ];
+
+  function buildLikert(containerId, statements, prefix) {
+    const container = document.getElementById(containerId);
+    statements.forEach((stmt, i) => {
+      const row = document.createElement('div');
+      row.className = 'likert-row';
+      row.innerHTML = `
+        <div class="likert-statement"><span class="likert-num">${i+1}.</span>${stmt}</div>
+        ${[1,2,3,4,5].map(v => `<div class="likert-cell"><input type="radio" name="${prefix}_${i}" value="${v}" aria-label="${v}"></div>`).join('')}
+      `;
+      container.appendChild(row);
+    });
+  }
+
+  buildLikert('likert-part2', part2Statements, 'p2');
+  buildLikert('likert-part3', part3Statements, 'p3');
+
+  // Radio option visual selection
+  document.querySelectorAll('.radio-group').forEach(group => {
+    group.addEventListener('change', e => {
+      group.querySelectorAll('.radio-option').forEach(opt => opt.classList.remove('selected'));
+      e.target.closest('.radio-option')?.classList.add('selected');
+    });
+  });
+
+  let currentSection = 0;
+
+  function updateProgress() {
+    const pct = (currentSection / 4) * 100;
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.querySelectorAll('.step-dot').forEach((dot, i) => {
+      dot.classList.remove('active', 'completed');
+      if (i === currentSection) dot.classList.add('active');
+      else if (i < currentSection) dot.classList.add('completed');
+    });
+  }
+
+  function showSection(idx) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById('section-' + idx);
+    if (el) { el.classList.add('active'); currentSection = idx; }
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function validatePart1() {
+    let ok = true;
+    const yearCard = document.getElementById('q-year');
+    if (!document.querySelector('input[name="year"]:checked')) {
+      yearCard.classList.add('has-error'); ok = false;
+    } else yearCard.classList.remove('has-error');
+    const deptCard = document.getElementById('q-dept');
+    if (!document.getElementById('dept-input').value.trim()) {
+      deptCard.classList.add('has-error'); ok = false;
+    } else deptCard.classList.remove('has-error');
+    const freqCard = document.getElementById('q-freq');
+    if (!document.querySelector('input[name="freq"]:checked')) {
+      freqCard.classList.add('has-error'); ok = false;
+    } else freqCard.classList.remove('has-error');
+    return ok;
+  }
+
+  function validateLikert(prefix, count, errId) {
+    let ok = true;
+    for (let i = 0; i < count; i++) {
+      if (!document.querySelector(`input[name="${prefix}_${i}"]:checked`)) { ok = false; break; }
+    }
+    document.getElementById(errId).style.display = ok ? 'none' : 'block';
+    return ok;
+  }
+
+  function goNext(from) {
+    if (from === 0 && !validatePart1()) return;
+    if (from === 1 && !validateLikert('p2', part2Statements.length, 'err-part2')) return;
+    if (from === 2 && !validateLikert('p3', part3Statements.length, 'err-part3')) return;
+    showSection(from + 1);
+  }
+
+  function goBack(from) { showSection(from - 1); }
+
+  // Generates a short readable unique ID e.g. "EUR-A3F9B2"
+  function generateResponseId() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let id = 'EUR-';
+    for (let i = 0; i < 6; i++) id += chars[Math.floor(Math.random() * chars.length)];
+    return id;
+  }
+
+  async function submitSurvey() {
+    const submitBtn = document.querySelector('#section-3 .btn-primary');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving…';
+
+    // Build the response document
+    const responseId = generateResponseId();
+    const payload = {
+      responseId,
+      submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+
+      // Part I — Profile
+      profile: {
+        yearLevel:   document.querySelector('input[name="year"]:checked')?.value,
+        department:  document.getElementById('dept-input').value.trim(),
+        visitFrequency: document.querySelector('input[name="freq"]:checked')?.value
+      },
+
+      // Part II — Queuing Experience (keyed by statement index, value 1–5)
+      queuingExperience: Object.fromEntries(
+        part2Statements.map((stmt, i) => [
+          `q${i + 1}`,
+          {
+            statement: stmt,
+            rating: Number(document.querySelector(`input[name="p2_${i}"]:checked`)?.value)
+          }
+        ])
+      ),
+
+      // Part III — Receptiveness (keyed by statement index, value 1–5)
+      receptiveness: Object.fromEntries(
+        part3Statements.map((stmt, i) => [
+          `q${i + 1}`,
+          {
+            statement: stmt,
+            rating: Number(document.querySelector(`input[name="p3_${i}"]:checked`)?.value)
+          }
+        ])
+      ),
+
+      // Part IV — Open-ended (optional)
+      openFeedback: {
+        biggestChallenge: document.getElementById('oa1').value.trim() || null,
+        desiredFeatures:  document.getElementById('oa2').value.trim() || null,
+        otherComments:    document.getElementById('oa3').value.trim() || null
+      }
+    };
+
+    try {
+      // Saves to collection "survey_responses" with auto-generated Firestore doc ID
+      await db.collection('survey_responses').add(payload);
+
+      // Show success screen
+      document.getElementById('progress-bar').style.width = '100%';
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.step-dot').forEach(d => d.classList.add('completed'));
+
+      // Inject the response ID into the thank-you screen
+      document.getElementById('response-id-display').textContent = responseId;
+      document.getElementById('section-done').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    } catch (err) {
+      console.error('Firestore save failed:', err);
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Survey ✓';
+      alert('⚠️ Could not save your response. Please check your internet connection and try again.\n\nError: ' + err.message);
+    }
+  }
+
+  updateProgress();
+</script>
+</body>
+</html>

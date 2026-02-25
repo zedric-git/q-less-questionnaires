@@ -8,7 +8,18 @@
       "Bash(gh repo create:*)",
       "Bash(npm install:*)",
       "Bash(vercel:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "WebSearch",
+      "WebFetch(domain:cit.edu)",
+      "Bash(git -C \"C:\\\\Users\\\\zedric\\\\Documents\\\\dev\\\\q-less-questionnaires\" status)",
+      "Bash(git -C \"C:\\\\Users\\\\zedric\\\\Documents\\\\dev\\\\q-less-questionnaires\" diff)",
+      "Bash(git -C \"C:\\\\Users\\\\zedric\\\\Documents\\\\dev\\\\q-less-questionnaires\" log --oneline -5)",
+      "Bash(git -C \"C:\\\\Users\\\\zedric\\\\Documents\\\\dev\\\\q-less-questionnaires\" add qless-survey_1.html)",
+      "Bash(git -C \"C:\\\\Users\\\\zedric\\\\Documents\\\\dev\\\\q-less-questionnaires\" commit -m \"$\\(cat <<''EOF''\nRebrand survey with CIT-U maroon and gold theme\n\nSwap CSS custom properties and hover/state colors from the generic\ndark/orange scheme to CIT-U''s institutional maroon \\(#800000\\) and\ngold \\(#CFB53B\\). Adjusts header watermark opacity, radio selection\ntints, and button hover glow to match the new palette.\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C \"C:\\\\Users\\\\zedric\\\\Documents\\\\dev\\\\q-less-questionnaires\" push)",
+      "Bash(npm create:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)"
     ]
   }
 }

@@ -2,6 +2,7 @@ export default function Header() {
   return (
     <header>
       <div className="header-inner">
+        <img src="/cit-logo.png" alt="CIT-U" className="header-logo" />
         <div className="tag">Pre-Survey</div>
         <h1>
           Q-Less Pre-Survey

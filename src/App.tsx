@@ -12,8 +12,6 @@ import {
   generateResponseId,
 } from "./services/firebase.ts";
 
-const TOTAL_SECTIONS = 4;
-
 export default function App() {
   const [currentSection, setCurrentSection] = useState(0);
   // Fix #11: track direction for correct slide animation

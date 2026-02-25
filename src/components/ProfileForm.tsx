@@ -1,9 +1,11 @@
+import { useState } from "react";
+
 interface ProfileFormProps {
   year: string;
   department: string;
   frequency: string;
   errors: { year: boolean; department: boolean; frequency: boolean };
-  onChange: (field: string, value: string) => void;
+  onChange: (field: "year" | "department" | "frequency", value: string) => void;
   onNext: () => void;
 }
 
@@ -13,6 +15,19 @@ const yearOptions = [
   "3rd Year",
   "4th Year",
   "5th Year / Beyond",
+];
+
+// Fix #6: predefined CIT-U colleges for consistent data quality
+const deptPresets = [
+  "College of Computer Studies",
+  "College of Engineering and Architecture",
+  "College of Arts, Sciences, and Technology",
+  "College of Business Administration",
+  "College of Education",
+  "College of Criminal Justice Education",
+  "College of Nursing",
+  "College of Hospitality Management",
+  "Senior High School",
 ];
 
 const freqOptions = [
@@ -30,18 +45,47 @@ export default function ProfileForm({
   onChange,
   onNext,
 }: ProfileFormProps) {
+  // Fix #6: track whether user chose a preset or "other"
+  const [deptSelect, setDeptSelect] = useState<string>(() =>
+    deptPresets.includes(department) ? department : department ? "other" : ""
+  );
+  const [customDept, setCustomDept] = useState<string>(() =>
+    deptPresets.includes(department) ? "" : department
+  );
+
+  function handleSelectChange(val: string) {
+    setDeptSelect(val);
+    if (val === "other") {
+      onChange("department", customDept);
+    } else {
+      setCustomDept("");
+      onChange("department", val);
+    }
+  }
+
+  function handleCustomChange(val: string) {
+    setCustomDept(val);
+    onChange("department", val);
+  }
+
   return (
     <>
-      <div className="section-title">Part I</div>
-      <div className="section-subtitle">
+      <h2 className="section-title">Part I</h2>
+      <p className="section-subtitle">
         Respondent Profile &mdash; Please check or fill in the appropriate
         response.
-      </div>
+      </p>
 
+      {/* Fix #12: role="radiogroup" with aria-required on the group, not each input */}
       <div className={`card field-group${errors.year ? " has-error" : ""}`}>
         <div className="q-num">Question 1</div>
-        <label className="field-label">Year Level</label>
-        <div className="radio-group">
+        <label className="field-label" id="year-label">Year Level</label>
+        <div
+          role="radiogroup"
+          aria-labelledby="year-label"
+          aria-required="true"
+          className="radio-group"
+        >
           {yearOptions.map((opt) => (
             <label
               key={opt}
@@ -61,30 +105,51 @@ export default function ProfileForm({
         <div className="error-msg">Please select your year level.</div>
       </div>
 
-      <div
-        className={`card field-group${errors.department ? " has-error" : ""}`}
-      >
+      {/* Fix #6: select dropdown with "Other" fallback text input */}
+      <div className={`card field-group${errors.department ? " has-error" : ""}`}>
         <div className="q-num">Question 2</div>
-        <label className="field-label">College / Department</label>
-        <input
-          type="text"
-          placeholder="e.g., College of Computer Studies"
-          value={department}
-          onChange={(e) => onChange("department", e.target.value)}
-        />
+        <label className="field-label" htmlFor="dept-select">
+          College / Department
+        </label>
+        <select
+          id="dept-select"
+          value={deptSelect}
+          onChange={(e) => handleSelectChange(e.target.value)}
+          aria-required="true"
+        >
+          <option value="">— Select your college —</option>
+          {deptPresets.map((d) => (
+            <option key={d} value={d}>{d}</option>
+          ))}
+          <option value="other">Other (please specify)</option>
+        </select>
+        {deptSelect === "other" && (
+          <input
+            type="text"
+            className="dept-custom-input"
+            placeholder="Enter your college or department"
+            value={customDept}
+            onChange={(e) => handleCustomChange(e.target.value)}
+            aria-label="Other college or department"
+          />
+        )}
         <div className="error-msg">
-          Please enter your college or department.
+          Please select your college or department.
         </div>
       </div>
 
-      <div
-        className={`card field-group${errors.frequency ? " has-error" : ""}`}
-      >
+      {/* Fix #12: role="radiogroup" with aria-required on the group */}
+      <div className={`card field-group${errors.frequency ? " has-error" : ""}`}>
         <div className="q-num">Question 3</div>
-        <label className="field-label">
+        <label className="field-label" id="freq-label">
           How often do you visit university offices per semester?
         </label>
-        <div className="radio-group">
+        <div
+          role="radiogroup"
+          aria-labelledby="freq-label"
+          aria-required="true"
+          className="radio-group"
+        >
           {freqOptions.map((opt) => (
             <label
               key={opt}

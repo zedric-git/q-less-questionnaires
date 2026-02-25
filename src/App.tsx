@@ -1,5 +1,4 @@
-import { useState } from "react";
-import ProgressBar from "./components/ProgressBar.tsx";
+import { useState, useEffect } from "react";
 import Header from "./components/Header.tsx";
 import StepNav from "./components/StepNav.tsx";
 import SurveySection from "./components/SurveySection.tsx";
@@ -17,9 +16,12 @@ const TOTAL_SECTIONS = 4;
 
 export default function App() {
   const [currentSection, setCurrentSection] = useState(0);
+  // Fix #11: track direction for correct slide animation
+  const [navDirection, setNavDirection] = useState<"forward" | "back">("forward");
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [responseId, setResponseId] = useState("");
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Part I
   const [year, setYear] = useState("");
@@ -31,9 +33,11 @@ export default function App() {
     frequency: false,
   });
 
-  // Part II & III
+  // Part II & III — Fix #3: use a counter so repeated failed attempts re-trigger scroll
+  const [likertErrors, setLikertErrors] = useState({ part2: 0, part3: 0 });
+
+  // Part II & III ratings
   const [ratings, setRatings] = useState<Record<string, number>>({});
-  const [likertErrors, setLikertErrors] = useState({ part2: false, part3: false });
 
   // Part IV
   const [feedback, setFeedback] = useState({
@@ -42,12 +46,30 @@ export default function App() {
     otherComments: "",
   });
 
+  // Fix #13: warn before unload when form has unsaved data
+  useEffect(() => {
+    const isDirty = Boolean(
+      year || department || frequency ||
+      Object.keys(ratings).length ||
+      feedback.biggestChallenge || feedback.desiredFeatures || feedback.otherComments
+    );
+    if (!isDirty || submitted) return;
+
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [year, department, frequency, ratings, feedback, submitted]);
+
   function goToSection(idx: number) {
+    setNavDirection(idx > currentSection ? "forward" : "back");
     setCurrentSection(idx);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function handleProfileChange(field: string, value: string) {
+  function handleProfileChange(field: "year" | "department" | "frequency", value: string) {
     if (field === "year") setYear(value);
     else if (field === "department") setDepartment(value);
     else if (field === "frequency") setFrequency(value);
@@ -76,26 +98,35 @@ export default function App() {
 
   function handleNextFromPart2() {
     const valid = validateLikert("p2", part2Statements.length);
-    setLikertErrors((prev) => ({ ...prev, part2: !valid }));
-    if (valid) goToSection(2);
+    if (valid) {
+      setLikertErrors((prev) => ({ ...prev, part2: 0 }));
+      goToSection(2);
+    } else {
+      setLikertErrors((prev) => ({ ...prev, part2: prev.part2 + 1 }));
+    }
   }
 
   function handleNextFromPart3() {
     const valid = validateLikert("p3", part3Statements.length);
-    setLikertErrors((prev) => ({ ...prev, part3: !valid }));
-    if (valid) goToSection(3);
+    if (valid) {
+      setLikertErrors((prev) => ({ ...prev, part3: 0 }));
+      goToSection(3);
+    } else {
+      setLikertErrors((prev) => ({ ...prev, part3: prev.part3 + 1 }));
+    }
   }
 
   function handleRatingChange(key: string, value: number) {
     setRatings((prev) => ({ ...prev, [key]: value }));
   }
 
-  function handleFeedbackChange(field: string, value: string) {
+  function handleFeedbackChange(field: "biggestChallenge" | "desiredFeatures" | "otherComments", value: string) {
     setFeedback((prev) => ({ ...prev, [field]: value }));
   }
 
   async function handleSubmit() {
     setSubmitting(true);
+    setSubmitError(null);
     const rid = generateResponseId();
 
     const payload = {
@@ -133,89 +164,77 @@ export default function App() {
       setSubmitting(false);
       const message =
         err instanceof Error ? err.message : "Unknown error";
-      alert(
-        `Could not save your response. Please check your internet connection and try again.\n\nError: ${message}`
+      setSubmitError(
+        `Could not save your response. Please check your internet connection and try again. (${message})`
       );
     }
   }
 
-  if (submitted) {
-    return (
-      <>
-        <ProgressBar
-          currentSection={currentSection}
-          totalSections={TOTAL_SECTIONS}
-          submitted={submitted}
-        />
-        <Header />
-        <StepNav currentSection={currentSection} submitted={submitted} />
-        <main>
-          <SuccessScreen responseId={responseId} />
-        </main>
-      </>
-    );
-  }
-
   return (
     <>
-      <ProgressBar
-        currentSection={currentSection}
-        totalSections={TOTAL_SECTIONS}
-        submitted={submitted}
-      />
       <Header />
-      <StepNav currentSection={currentSection} submitted={submitted} />
+      {/* Fix #5: removed redundant ProgressBar — StepNav is the sole progress indicator */}
+      <StepNav
+        currentSection={currentSection}
+        submitted={submitted}
+        onGoToSection={goToSection}
+      />
       <main>
-        <SurveySection active={currentSection === 0}>
-          <ProfileForm
-            year={year}
-            department={department}
-            frequency={frequency}
-            errors={profileErrors}
-            onChange={handleProfileChange}
-            onNext={handleNextFromProfile}
-          />
-        </SurveySection>
+        {submitted ? (
+          <SuccessScreen responseId={responseId} />
+        ) : (
+          <>
+            <SurveySection active={currentSection === 0} direction={navDirection}>
+              <ProfileForm
+                year={year}
+                department={department}
+                frequency={frequency}
+                errors={profileErrors}
+                onChange={handleProfileChange}
+                onNext={handleNextFromProfile}
+              />
+            </SurveySection>
 
-        <SurveySection active={currentSection === 1}>
-          <LikertSection
-            part="II"
-            title="Part II"
-            subtitle="Current Queuing Experience — Rate each statement from 1 (Strongly Disagree) to 5 (Strongly Agree)."
-            statements={part2Statements}
-            prefix="p2"
-            ratings={ratings}
-            error={likertErrors.part2}
-            onChange={handleRatingChange}
-            onBack={() => goToSection(0)}
-            onNext={handleNextFromPart2}
-          />
-        </SurveySection>
+            <SurveySection active={currentSection === 1} direction={navDirection}>
+              <LikertSection
+                title="Part II"
+                subtitle="Current Queuing Experience — Rate each statement from 1 (Strongly Disagree) to 5 (Strongly Agree)."
+                statements={part2Statements}
+                prefix="p2"
+                ratings={ratings}
+                errorCount={likertErrors.part2}
+                onChange={handleRatingChange}
+                onBack={() => goToSection(0)}
+                onNext={handleNextFromPart2}
+              />
+            </SurveySection>
 
-        <SurveySection active={currentSection === 2}>
-          <LikertSection
-            part="III"
-            title="Part III"
-            subtitle="Receptiveness to a Virtual Queuing System — The proposed Q-Less system allows students to join a queue remotely, monitor their position in real time, and receive notifications. Rate each statement from 1–5."
-            statements={part3Statements}
-            prefix="p3"
-            ratings={ratings}
-            error={likertErrors.part3}
-            onChange={handleRatingChange}
-            onBack={() => goToSection(1)}
-            onNext={handleNextFromPart3}
-          />
-        </SurveySection>
+            <SurveySection active={currentSection === 2} direction={navDirection}>
+              <LikertSection
+                title="Part III"
+                subtitle="Receptiveness to a Virtual Queuing System — The proposed Q-Less system allows students to join a queue remotely, monitor their position in real time, and receive notifications. Rate each statement from 1–5."
+                statements={part3Statements}
+                prefix="p3"
+                ratings={ratings}
+                errorCount={likertErrors.part3}
+                onChange={handleRatingChange}
+                onBack={() => goToSection(1)}
+                onNext={handleNextFromPart3}
+              />
+            </SurveySection>
 
-        <SurveySection active={currentSection === 3}>
-          <FeedbackForm
-            feedback={feedback}
-            submitting={submitting}
-            onChange={handleFeedbackChange}
-            onBack={() => goToSection(2)}
-            onSubmit={handleSubmit}
-          />
-        </SurveySection>
+            <SurveySection active={currentSection === 3} direction={navDirection}>
+              <FeedbackForm
+                feedback={feedback}
+                submitting={submitting}
+                submitError={submitError}
+                onChange={handleFeedbackChange}
+                onBack={() => goToSection(2)}
+                onSubmit={handleSubmit}
+              />
+            </SurveySection>
+          </>
+        )}
       </main>
     </>
   );

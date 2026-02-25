@@ -5,7 +5,8 @@ interface FeedbackFormProps {
     otherComments: string;
   };
   submitting: boolean;
-  onChange: (field: string, value: string) => void;
+  submitError?: string | null;
+  onChange: (field: "biggestChallenge" | "desiredFeatures" | "otherComments", value: string) => void;
   onBack: () => void;
   onSubmit: () => void;
 }
@@ -13,17 +14,18 @@ interface FeedbackFormProps {
 export default function FeedbackForm({
   feedback,
   submitting,
+  submitError,
   onChange,
   onBack,
   onSubmit,
 }: FeedbackFormProps) {
   return (
     <>
-      <div className="section-title">Part IV</div>
-      <div className="section-subtitle">
+      <h2 className="section-title">Part IV</h2>
+      <p className="section-subtitle">
         Additional Feedback (Optional) &mdash; These responses will greatly help
         the researchers understand your experience.
-      </div>
+      </p>
 
       <div className="card field-group">
         <div className="q-num">Question 1 &middot; Optional</div>
@@ -65,6 +67,10 @@ export default function FeedbackForm({
           onChange={(e) => onChange("otherComments", e.target.value)}
         />
       </div>
+
+      {submitError && (
+        <div className="submit-error">{submitError}</div>
+      )}
 
       <div className="btn-row">
         <button className="btn btn-secondary" onClick={onBack} disabled={submitting}>

@@ -9,6 +9,12 @@ export default function ProgressBar({
   totalSections,
   submitted,
 }: ProgressBarProps) {
-  const pct = submitted ? 100 : (currentSection / totalSections) * 100;
-  return <div className="progress-bar" style={{ width: `${pct}%` }} />;
+  const filled = submitted ? totalSections : currentSection + 1;
+  return (
+    <div className="progress-segmented">
+      {Array.from({ length: totalSections }, (_, i) => (
+        <div key={i} className={`progress-seg${i < filled ? " filled" : ""}`} />
+      ))}
+    </div>
+  );
 }

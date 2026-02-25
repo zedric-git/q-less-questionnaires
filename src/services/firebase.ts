@@ -7,12 +7,12 @@ import {
 } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAFKbrgaxDke1iPFeiGuOTeslj4fxAyovM",
-  authDomain: "qless-pre-survey.firebaseapp.com",
-  projectId: "qless-pre-survey",
-  storageBucket: "qless-pre-survey.firebasestorage.app",
-  messagingSenderId: "760469555291",
-  appId: "1:760469555291:web:e8c99ac0e6c6ab81c5177e",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 const app = initializeApp(firebaseConfig);

@@ -5,8 +5,7 @@
   --accent2: #CFB53B;
   --muted: #6B6460;
   --border: #E0D5C8;
-  --card: #ffffff;
-  --progress-h: 4px;
+  --card: #f9f5ee;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -17,17 +16,6 @@ body {
   color: var(--ink);
   min-height: 100vh;
   line-height: 1.6;
-}
-
-/* Progress bar */
-.progress-bar {
-  position: fixed;
-  top: 0; left: 0;
-  height: var(--progress-h);
-  background: var(--accent);
-  width: 0%;
-  transition: width 0.4s ease;
-  z-index: 100;
 }
 
 header {
@@ -89,9 +77,10 @@ header h1 {
   margin-bottom: 0.5rem;
 }
 
+/* Fix #9: was 0.6 opacity — low contrast against dark background */
 header p {
   font-size: 0.92rem;
-  color: rgba(245,242,236,0.6);
+  color: rgba(245,242,236,0.85);
   max-width: 520px;
 }
 
@@ -110,6 +99,7 @@ header p {
   flex-wrap: wrap;
 }
 
+/* Fix #9: was 0.35 opacity — nearly invisible against dark background */
 .step-dot {
   display: flex;
   align-items: center;
@@ -118,14 +108,27 @@ header p {
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.05em;
-  color: rgba(245,242,236,0.35);
+  color: rgba(245,242,236,0.55);
   padding: 0.3rem 0.6rem;
   border-radius: 4px;
   transition: all 0.2s;
 }
 
+/* Fix #8: clickable completed steps — reset button styles */
+button.step-dot {
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+button.step-dot:hover {
+  color: var(--paper);
+  background: rgba(255,255,255,0.08);
+}
+
 .step-dot.active { color: var(--paper); }
-.step-dot.completed { color: var(--accent); }
+.step-dot.completed { color: var(--accent2); }
 
 .step-dot .num {
   width: 20px; height: 20px;
@@ -137,8 +140,8 @@ header p {
 }
 
 .step-dot.completed .num {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--accent2);
+  border-color: var(--accent2);
   color: white;
 }
 
@@ -153,8 +156,18 @@ main {
   animation: fadeUp 0.35s ease both;
 }
 
+/* Fix #11: backward navigation fades from above */
+.section.back {
+  animation: fadeDown 0.35s ease both;
+}
+
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -230,7 +243,7 @@ label.field-label {
   flex-shrink: 0;
 }
 
-input[type="text"], textarea {
+input[type="text"], textarea, select {
   width: 100%;
   padding: 0.7rem 1rem;
   border: 1.5px solid var(--border);
@@ -243,7 +256,18 @@ input[type="text"], textarea {
   resize: vertical;
 }
 
-input[type="text"]:focus, textarea:focus {
+/* Fix #6: select dropdown styling */
+select {
+  resize: none;
+  cursor: pointer;
+  appearance: none;
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6460' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+}
+
+input[type="text"]:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--accent2);
 }
@@ -279,7 +303,8 @@ input[type="text"]:focus, textarea:focus {
 
 .likert-row:last-child { border-bottom: 1px solid var(--border); }
 
-.likert-row:hover { background: rgba(0,0,0,0.015); margin: 0 -1rem; padding-left: 1rem; padding-right: 1rem; border-radius: 4px; }
+/* Fix #2: removed margin shift — only change background on hover */
+.likert-row:hover { background: rgba(0,0,0,0.03); }
 
 .likert-statement {
   font-size: 0.88rem;
@@ -291,7 +316,9 @@ input[type="text"]:focus, textarea:focus {
   font-family: 'Syne', sans-serif;
   font-size: 0.72rem;
   font-weight: 700;
-  color: var(--muted);
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   margin-right: 0.5rem;
   min-width: 1rem;
   flex-shrink: 0;
@@ -301,6 +328,8 @@ input[type="text"]:focus, textarea:focus {
   display: flex;
   justify-content: center;
   align-items: center;
+  /* Fix #1: ensure minimum 44px touch target height */
+  min-height: 44px;
 }
 
 .likert-cell input[type="radio"] {
@@ -390,6 +419,14 @@ input[type="text"]:focus, textarea:focus {
 .has-error .error-msg { display: block; }
 .has-error .card { border-color: var(--accent); }
 
+/* Fix #10: standalone error message (used outside has-error wrapper) */
+.error-msg-block {
+  font-size: 0.8rem;
+  color: var(--accent);
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+}
+
 /* Success screen */
 .section-done {
   text-align: center;
@@ -414,7 +451,7 @@ input[type="text"]:focus, textarea:focus {
   margin-bottom: 0.6rem;
 }
 
-.section-done p { color: var(--muted); max-width: 360px; margin: 0 auto; }
+.section-done p { color: var(--muted); max-width: 360px; margin: 0 auto 1.2rem; }
 
 .response-id-badge {
   display: inline-block;
@@ -426,30 +463,142 @@ input[type="text"]:focus, textarea:focus {
   letter-spacing: 0.15em;
   padding: 0.5rem 1.2rem;
   border-radius: 4px;
-  margin-bottom: 1.2rem;
+  margin-bottom: 0.6rem;
 }
 
 .response-id {
-  color: var(--accent);
+  color: var(--accent2);
 }
 
-/* Question number */
-.q-num {
+/* Fix #7: copy button for response ID */
+.copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  color: var(--muted);
   font-family: 'Syne', sans-serif;
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  color: var(--accent);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin-bottom: 0.5rem;
+  padding: 0.35rem 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 1.2rem;
 }
+
+.copy-btn:hover { border-color: var(--ink); color: var(--ink); }
+.copy-btn.copied { border-color: var(--accent2); color: var(--accent2); }
+
+/* Submit error banner */
+.submit-error {
+  background: rgba(128,0,0,0.06);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  color: var(--accent);
+  font-size: 0.85rem;
+  padding: 0.7rem 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Likert row visual states */
+.likert-row.answered { background: rgba(207,181,59,0.06); }
+.likert-row.unanswered-error { background: rgba(128,0,0,0.04); border-left: 2px solid var(--accent); }
+
+/* Success screen classes */
+.success-note { font-size: 0.8rem; margin-bottom: 0.4rem; }
+.success-footer { font-size: 0.82rem; }
 
 .field-group { margin-bottom: 1.4rem; }
 
+/* Fix #6: custom dept input spacing */
+.dept-custom-input { margin-top: 0.6rem; }
+
+/* Likert radio group: display:contents on desktop so cells are direct grid children */
+.likert-radio-group { display: contents; }
+
 @media (max-width: 560px) {
-  .likert-header { grid-template-columns: 1fr repeat(5, 36px); }
-  .likert-row { grid-template-columns: 1fr repeat(5, 36px); }
-  .likert-header span { font-size: 0.54rem; }
+  /* === Spacing === */
+  header { padding: 1.75rem 1.25rem 1.5rem; }
+  .step-nav { padding: 0 1.25rem 1rem; }
+  main { padding: 1.75rem 1.25rem 4rem; }
+  .card { padding: 1rem 1.1rem; }
+
+  /* === Step nav — larger tap area, hide labels === */
+  .step-dot { padding: 0.5rem 0.6rem; }
   .step-dot .label { display: none; }
+
+  /* === Touch targets === */
+  .radio-option, .checkbox-option { min-height: 44px; }
+  .copy-btn { min-height: 44px; padding: 0 1rem; }
+
+  /* === Likert: replace table grid with stacked per-row layout === */
+  .likert-header { display: none; }
+
+  .likert-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 0.9rem 0;
+  }
+
+  .likert-statement { padding-right: 0; }
+
+  /* Radio group becomes a flex row of numbered cells */
+  .likert-radio-group {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 0.25rem;
+  }
+
+  .likert-cell {
+    flex: 1;
+    flex-direction: column;
+    min-height: 52px;
+    min-width: 44px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    background: white;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  /* Show scale number above each radio button */
+  .likert-cell::before {
+    content: attr(data-v);
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 0.2rem;
+  }
+
+  /* Selected cell highlight */
+  .likert-cell:has(input:checked) {
+    border-color: var(--accent2);
+    background: rgba(207, 181, 59, 0.15);
+  }
+
+  .likert-cell:has(input:checked)::before {
+    color: var(--accent2);
+  }
+
+  /* Replace row-level answered/error states with cell-level ones on mobile */
+  .likert-row.answered { background: transparent; }
+  .likert-row.unanswered-error {
+    border-left: none;
+    background: transparent;
+  }
+  .likert-row.unanswered-error .likert-cell {
+    border-color: rgba(128, 0, 0, 0.35);
+  }
+
+  /* === Scale legend === */
   .scale-labels { flex-direction: column; gap: 0.4rem; }
+
+  /* === Buttons — slightly tighter on narrow screens === */
+  .btn { padding: 0.75rem 1.2rem; }
 }

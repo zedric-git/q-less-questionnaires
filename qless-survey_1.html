@@ -7,12 +7,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #0f0f14;
-    --paper: #f5f2ec;
-    --accent: #c84b31;
-    --accent2: #2b5be0;
-    --muted: #7a7770;
-    --border: #ddd9d0;
+    --ink: #4A0000;
+    --paper: #FDF8F0;
+    --accent: #800000;
+    --accent2: #CFB53B;
+    --muted: #6B6460;
+    --border: #E0D5C8;
     --card: #ffffff;
     --progress-h: 4px;
   }
@@ -55,7 +55,7 @@
     font-family: 'Syne', sans-serif;
     font-size: clamp(5rem, 15vw, 12rem);
     font-weight: 800;
-    color: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.07);
     line-height: 1;
     pointer-events: none;
     white-space: nowrap;
@@ -218,13 +218,13 @@
 
   .radio-option:hover, .checkbox-option:hover {
     border-color: var(--accent2);
-    background: rgba(43,91,224,0.04);
+    background: rgba(207,181,59,0.08);
   }
 
   .radio-option.selected, .checkbox-option.selected {
     border-color: var(--accent2);
-    background: rgba(43,91,224,0.07);
-    color: var(--accent2);
+    background: rgba(207,181,59,0.12);
+    color: #806E1A;
     font-weight: 500;
   }
 
@@ -377,7 +377,7 @@
     background: var(--accent);
     color: white;
   }
-  .btn-primary:hover { background: #a83826; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(200,75,49,0.3); }
+  .btn-primary:hover { background: #600000; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(128,0,0,0.3), 0 0 0 3px rgba(207,181,59,0.25); }
 
   .btn-secondary {
     background: transparent;

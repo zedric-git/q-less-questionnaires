@@ -15,6 +15,12 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+  throw new Error(
+    "Firebase environment variables are not set. Add VITE_FIREBASE_* variables to your deployment."
+  );
+}
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -38,10 +44,19 @@ export interface SurveyPayload {
 export async function submitSurveyResponse(
   payload: Omit<SurveyPayload, "submittedAt">
 ) {
-  const docRef = await addDoc(collection(db, "survey_responses"), {
+  const write = addDoc(collection(db, "survey_responses"), {
     ...payload,
     submittedAt: serverTimestamp(),
   });
+
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(
+      () => reject(new Error("Request timed out. Please check your connection and try again.")),
+      15000
+    )
+  );
+
+  const docRef = await Promise.race([write, timeout]);
   return docRef.id;
 }
 
